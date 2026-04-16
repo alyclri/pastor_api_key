@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planner Dashboard</title>
+    <style>
+        /* Base Styles & Typography */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: #e5e9f0; /* Light grayish-blue background */
+            color: #2c3e50;
+        }
+
+        /* Header Section */
+        .header-section {
+            margin-bottom: 20px;
+        }
+        .header-section h4 {
+            color: #5a7bb5;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 5px 0;
+            font-size: 13px;
+        }
+        .header-section h1 {
+            color: #1a3b5c;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        .header-section p {
+            color: #556b82;
+            font-size: 14px;
+            margin: 0;
+            max-width: 900px;
+        }
+
+        /* Panel Containers */
+        .panel {
+            background-color: #f1f4f8;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #d1d9e6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .panel-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Form Controls */
+        .form-row {
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+        .input-group input {
+            padding: 10px 12px;
+            border: 1px solid #cbd4e0;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fafbfc;
+            color: #2c3e50;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #2185d0;
+        }
+        button {
+            padding: 10px 24px;
+            background-color: #1f78c1;
+            color: white;
+            border: none;
+            border-radius: 20px; /* Pill shape */
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            height: 40px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #165b96;
+        }
+
+        /* Summary Bar */
+        .summary-bar {
+            display: flex;
+            gap: 60px;
+            background-color: #e8ecef;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #d1d9e6;
+        }
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .summary-label {
+            font-size: 11px;
+            color: #556b82;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .summary-val {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1a3b5c;
+        }
+
+        /* Tables Layout */
+        .tables-container {
+            display: flex;
+            gap: 20px;
+        }
+        .table-wrapper {
+            flex: 1;
+            background-color: #f1f4f8;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #d1d9e6;
+            overflow-x: auto;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background-color: white;
+            border: 1px solid #d1d9e6;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e6ed;
+            word-break: break-all;
+        }
+        th {
+            background-color: #e4e9f0;
+            color: #34495e;
+            font-weight: 600;
+            border-bottom: 2px solid #cbd4e0;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        /* Specific column widths to match design */
+        th:first-child { width: 30%; }
+        th:last-child { width: 70%; }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <h4>MapQuest API Integration</h4>
+        <h1>Route Planner Dashboard</h1>
+        <p>Enter a starting location and destination to request route data, then review every request input and API output in table format.</p>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">Route Request Form</div>
+        <div class="form-row">
+            <div class="input-group">
+                <label for="startLocation">Starting Location</label>
+                <input type="text" id="startLocation" value="Ozamis" placeholder="e.g., Ozamis">
+            </div>
+            <div class="input-group">
+                <label for="destination">Destination</label>
+                <input type="text" id="destination" value="Pagadian" placeholder="e.g., Pagadian">
+            </div>
+            <button onclick="getRouteData()">Get Route</button>
+        </div>
+
+        <div class="summary-bar">
+            <div class="summary-item">
+                <div class="summary-label">Distance</div>
+                <div class="summary-val" id="sum-distance">-</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Estimated Time</div>
+                <div class="summary-val" id="sum-est-time">-</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Formatted Time</div>
+                <div class="summary-val" id="sum-fmt-time">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tables-container">
+        <div class="table-wrapper">
+            <div class="panel-title">API Request Inputs (Table)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Input Field</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody id="requestTableBody">
+                    <tr><td colspan="2" style="text-align:center; color:#999;">Submit a request to populate this table</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-wrapper">
+            <div class="panel-title">API Response Outputs (Table)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Output Field</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody id="responseTableBody">
+                    <tr><td colspan="2" style="text-align:center; color:#999;">Submit a request to populate this table</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+    // --- IMPORTANT: PASTE YOUR API KEY BELOW ---
+    const MAPQUEST_API_KEY = 'AJtkTSIWIQMioyJdmXPnDXsaeIkcLLjH'; 
+
+    // Helper to format seconds into "Xh Ym" format
+    function formatHoursMinutes(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        let result = "";
+        if (h > 0) result += `${h}h `;
+        result += `${m}m`;
+        return result;
+    }
+
+    async function getRouteData() {
+        const start = document.getElementById('startLocation').value.trim();
+        const end = document.getElementById('destination').value.trim();
+
+        if (!start || !end) {
+            alert("Please enter both a starting location and a destination.");
+            return;
+        }
+
+        if (MAPQUEST_API_KEY === 'YOUR_API_KEY_HERE') {
+            alert("Please replace 'YOUR_API_KEY_HERE' in the code with your actual MapQuest API Key.");
+            return;
+        }
+
+        // Standardized request parameters exactly like the dashboard shows
+        const params = {
+            key: MAPQUEST_API_KEY,
+            from: start,
+            to: end,
+            outFormat: 'json',
+            ambiguities: 'ignore',
+            routeType: 'fastest',
+            doReverseGeocode: 'false',
+            enhancedNarrative: 'false',
+            avoidTimedConditions: 'false'
+        };
+
+        // Construct the full URL
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = 'https://www.mapquestapi.com/directions/v2/route';
+        const url = `${endpoint}?${queryString}`;
+
+        try {
+            // Fetch data from MapQuest API
+            const response = await fetch(url);
+            const data = await response.json();
+
+            // Populate the Request Table visually
+            const reqBody = document.getElementById('requestTableBody');
+            const hiddenKey = MAPQUEST_API_KEY.substring(0,4) + '...' + MAPQUEST_API_KEY.substring(MAPQUEST_API_KEY.length-4);
+            
+            reqBody.innerHTML = `
+                <tr><td>endpoint</td><td>${endpoint}</td></tr>
+                <tr><td>key</td><td>${hiddenKey}</td></tr>
+                <tr><td>from</td><td>${start}</td></tr>
+                <tr><td>to</td><td>${end}</td></tr>
+                <tr><td>outFormat</td><td>${params.outFormat}</td></tr>
+                <tr><td>ambiguities</td><td>${params.ambiguities}</td></tr>
+                <tr><td>routeType</td><td>${params.routeType}</td></tr>
+                <tr><td>doReverseGeocode</td><td>${params.doReverseGeocode}</td></tr>
+                <tr><td>enhancedNarrative</td><td>${params.enhancedNarrative}</td></tr>
+                <tr><td>avoidTimedConditions</td><td>${params.avoidTimedConditions}</td></tr>
+                <tr><td>fullRequestUrl</td><td>${url}</td></tr>
+            `;
+
+            // Check if successful
+            if (data.info.statuscode === 0) {
+                const route = data.route;
+
+                // Update Summary Bar
+                document.getElementById('sum-distance').innerText = route.distance.toFixed(3) + ' mi';
+                document.getElementById('sum-est-time').innerText = formatHoursMinutes(route.time);
+                document.getElementById('sum-fmt-time').innerText = route.formattedTime;
+
+                // Populate the Response Table
+                let resHtml = `
+                    <tr><td>info.statuscode</td><td>${data.info.statuscode}</td></tr>
+                    <tr><td>info.messages</td><td>${data.info.messages.length ? data.info.messages.join(', ') : 'None'}</td></tr>
+                    <tr><td>route.distance_miles</td><td>${route.distance}</td></tr>
+                    <tr><td>route.formattedTime</td><td>${route.formattedTime}</td></tr>
+                    <tr><td>route.time_seconds</td><td>${route.time}</td></tr>
+                    <tr><td>route.realTime_seconds</td><td>${route.realTime}</td></tr>
+                    <tr><td>route.routeType</td><td>${route.options ? route.options.routeType : 'FASTEST'}</td></tr>
+                `;
+
+                // Add Lat/Lng if available
+                if (route.locations && route.locations.length >= 2) {
+                    const startLoc = route.locations[0].latLng;
+                    const endLoc = route.locations[route.locations.length - 1].latLng;
+                    resHtml += `
+                        <tr><td>route.startLatLng</td><td>${startLoc.lat}, ${startLoc.lng}</td></tr>
+                        <tr><td>route.endLatLng</td><td>${endLoc.lat}, ${endLoc.lng}</td></tr>
+                    `;
+                }
+
+                // Boolean flags and counts
+                resHtml += `
+                    <tr><td>route.hasHighway</td><td>${route.hasHighway}</td></tr>
+                    <tr><td>route.hasTollRoad</td><td>${route.hasTollRoad}</td></tr>
+                    <tr><td>route.hasBridge</td><td>${route.hasBridge}</td></tr>
+                    <tr><td>route.hasTunnel</td><td>${route.hasTunnel}</td></tr>
+                    <tr><td>route.locations_count</td><td>${route.locations ? route.locations.length : 0}</td></tr>
+                `;
+
+                // Add Legs/Maneuvers
+                if (route.legs && route.legs.length > 0) {
+                    const maneuvers = route.legs[0].maneuvers;
+                    resHtml += `<tr><td>route.maneuvers_count</td><td>${maneuvers.length}</td></tr>`;
+                    
+                    // Locations logic
+                    if (route.locations) {
+                        route.locations.forEach((loc, i) => {
+                            const locStr = `${loc.adminArea5} City, ${loc.adminArea3}, ${loc.adminArea1} | ${loc.latLng.lat}, ${loc.latLng.lng}`;
+                            resHtml += `<tr><td>location[${i+1}]</td><td>${locStr}</td></tr>`;
+                        });
+                    }
+                    
+                    // Maneuvers logic
+                    maneuvers.forEach((man, i) => {
+                        const manStr = `${man.directionName} | ${man.distance.toFixed(4)} mi | ${man.formattedTime} | ${man.narrative}`;
+                        resHtml += `<tr><td>maneuver[${i+1}]</td><td>${manStr}</td></tr>`;
+                    });
+                }
+
+                document.getElementById('responseTableBody').innerHTML = resHtml;
+
+            } else {
+                alert("API Error: " + data.info.messages.join(", "));
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            alert("Failed to connect to the MapQuest API. Please check your internet connection and API key.");
+        }
+    }
+</script>
+
+</body>
+</html>
